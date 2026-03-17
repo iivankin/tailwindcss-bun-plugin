@@ -9,18 +9,6 @@ const ROOT_DIR = import.meta.dir
 const BINARIES_DIR = path.join(ROOT_DIR, "binaries");
 const NATIVE_DIR = path.join(ROOT_DIR, "native");
 const BUILD_DIR = path.join(ROOT_DIR, ".tmp-build-plugin");
-const NAPI_BIN = path.join(
-  ROOT_DIR,
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "napi.cmd" : "napi"
-);
-const LEFTHOOK_BIN = path.join(
-  ROOT_DIR,
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "lefthook.cmd" : "lefthook"
-);
 
 function getArg(name: string) {
   const prefix = `${name}=`;
@@ -71,16 +59,13 @@ async function installLefthook() {
     return;
   }
 
-  const [hasGitMetadata, hasLefthook] = await Promise.all([
-    pathExists(path.join(ROOT_DIR, ".git")),
-    pathExists(LEFTHOOK_BIN),
-  ]);
+  const hasGitMetadata = await pathExists(path.join(ROOT_DIR, ".git"));
 
-  if (!(hasGitMetadata && hasLefthook)) {
+  if (!hasGitMetadata) {
     return;
   }
 
-  await Bun.$`${LEFTHOOK_BIN} install --reset-hooks-path`.cwd(ROOT_DIR);
+  await Bun.$`bun x lefthook install --reset-hooks-path`.cwd(ROOT_DIR);
 }
 
 function isMusl() {
@@ -185,7 +170,7 @@ const targetBuildDir = path.join(BUILD_DIR, target);
 await fs.rm(targetBuildDir, { recursive: true, force: true });
 await fs.mkdir(targetBuildDir, { recursive: true });
 
-await Bun.$`${NAPI_BIN} build --platform --release --target=${target} --output-dir ${targetBuildDir} --no-js`.cwd(
+await Bun.$`bun x napi build --platform --release --target=${target} --output-dir ${targetBuildDir} --no-js`.cwd(
   NATIVE_DIR
 );
 
