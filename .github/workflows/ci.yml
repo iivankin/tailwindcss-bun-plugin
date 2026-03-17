@@ -105,6 +105,7 @@ jobs:
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             package_id: linux-arm64-musl
+            bun_asset: bun-linux-aarch64-musl.zip
             strip: aarch64-linux-musl-strip
             download: true
             container:
@@ -112,6 +113,7 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             package_id: linux-x64-musl
+            bun_asset: bun-linux-x64-musl.zip
             strip: strip
             download: true
             container:
@@ -125,9 +127,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Bun
+        if: ${{ !matrix.bun_asset }}
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Bun (musl)
+        if: ${{ matrix.bun_asset }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+          bun-download-url: ${{ format('https://github.com/oven-sh/bun/releases/download/bun-v{0}/{1}', env.BUN_VERSION, matrix.bun_asset) }}
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
