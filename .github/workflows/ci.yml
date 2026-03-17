@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  BUN_VERSION: '1.3.10'
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.filter.outputs.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            package:
+              - 'native/**'
+              - 'scripts/**'
+              - 'src/**'
+              - 'binaries/**'
+              - 'test/**'
+              - 'package.json'
+              - 'bun.lock'
+              - 'tsconfig.json'
+              - 'README.md'
+              - 'LICENSE'
+              - '.github/workflows/ci.yml'
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run typecheck
+
+      - name: Format check
+        working-directory: native
+        run: cargo fmt --all --check
+
+      - name: Typecheck
+        working-directory: native
+        run: cargo check
+
+      - name: Clippy
+        working-directory: native
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  build-release-binaries:
+    needs: [changes]
+    if: |
+      github.event_name == 'push'
+      && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+      && needs.changes.outputs.package == 'true'
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            package_id: win32-x64-msvc
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            package_id: win32-arm64-msvc
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            package_id: darwin-x64
+            strip: strip -x
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            package_id: darwin-arm64
+            strip: strip -x
+          - os: ubuntu-latest
+            target: aarch64-linux-android
+            package_id: android-arm64
+            strip: ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            package_id: linux-x64-gnu
+            strip: strip
+            container:
+              image: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            package_id: linux-arm64-gnu
+            strip: llvm-strip
+            container:
+              image: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            package_id: linux-arm64-musl
+            strip: aarch64-linux-musl-strip
+            download: true
+            container:
+              image: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            package_id: linux-x64-musl
+            strip: strip
+            download: true
+            container:
+              image: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
+
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - run: bun install --ignore-scripts --frozen-lockfile
+
+      - name: Build release binary
+        env:
+          NAPI_BUILD_TARGET: ${{ matrix.target }}
+        run: bun run prepare --target=${{ matrix.target }}
+
+      - name: Stage binary package
+        env:
+          NAPI_BUILD_TARGET: ${{ matrix.target }}
+        run: bun run stage:binary-package --target=${{ matrix.target }}
+
+      - name: Strip debug symbols
+        if: ${{ matrix.strip }}
+        run: ${{ matrix.strip }} .tmp-release/${{ matrix.package_id }}/*.node
+
+      - name: Upload release binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.package_id }}
+          path: .tmp-release
+
+  publish-binary-packages:
+    needs: [changes, test, build-release-binaries]
+    if: |
+      github.event_name == 'push'
+      && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+      && needs.changes.outputs.package == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - package_id: android-arm64
+          - package_id: darwin-arm64
+          - package_id: darwin-x64
+          - package_id: linux-arm64-gnu
+          - package_id: linux-arm64-musl
+          - package_id: linux-x64-gnu
+          - package_id: linux-x64-musl
+          - package_id: win32-arm64-msvc
+          - package_id: win32-x64-msvc
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Download binary package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package-${{ matrix.package_id }}
+          path: .tmp-release
+
+      - name: Publish binary package
+        working-directory: .tmp-release/${{ matrix.package_id }}
+        run: bun publish --access public
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish:
+    needs: [changes, publish-binary-packages]
+    if: |
+      github.event_name == 'push'
+      && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+      && needs.changes.outputs.package == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Stage root package
+        run: bun run stage:root-package
+
+      - name: Publish root package
+        working-directory: .tmp-release/root
+        run: bun publish --access public
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}

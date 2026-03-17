@@ -1,0 +1,23 @@
+glob_matcher: doublestar
+
+pre-commit:
+  parallel: false
+  jobs:
+    - name: ultracite
+      glob: "**/*.{js,jsx,ts,tsx,mjs,cjs,cts,mts,json,jsonc,css}"
+      run: bun ultracite fix "{staged_files}"
+      stage_fixed: true
+    - name: rust-format
+      glob: "**/*.rs"
+      run: cargo fmt --all --check
+      root: "native/"
+    - name: rust-check
+      glob: "**/*.{rs,toml,lock}"
+      run: cargo check
+      root: "native/"
+    - name: rust-clippy
+      glob: "**/*.{rs,toml,lock}"
+      run: cargo clippy --all-targets --all-features -- -D warnings
+      root: "native/"
+    - name: typecheck
+      run: bun run typecheck

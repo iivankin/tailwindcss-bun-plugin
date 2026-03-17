@@ -1,0 +1,25 @@
+[package]
+name = "tailwindcss-bun-plugin-native"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bun-native-plugin = "0.2.0"
+fxhash = { package = "rustc-hash", version = "2.1.1" }
+napi = { version = "3.3.0", default-features = false, features = ["napi4"] }
+napi-derive = "3.2.5"
+rayon = "1.10.0"
+tailwindcss-oxide = { git = "https://github.com/tailwindlabs/tailwindcss.git", tag = "v4.2.1" }
+
+[build-dependencies]
+napi-build = "2.2.3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+opt-level = 3

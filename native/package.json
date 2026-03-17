@@ -1,0 +1,7 @@
+{
+  "name": "tailwindcss-bun-plugin-native",
+  "private": true,
+  "napi": {
+    "binaryName": "tailwindcss-bun-plugin-native"
+  }
+}
