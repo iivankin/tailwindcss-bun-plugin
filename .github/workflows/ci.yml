@@ -166,7 +166,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-${{ matrix.package_id }}
-          path: .tmp-release
+          path: .tmp-release/${{ matrix.package_id }}
+          include-hidden-files: true
+          if-no-files-found: error
 
   publish-binary-packages:
     needs: [changes, test, build-release-binaries]
