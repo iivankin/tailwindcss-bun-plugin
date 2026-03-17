@@ -205,7 +205,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: package-${{ matrix.package_id }}
-          path: .tmp-release
+          path: .tmp-release/${{ matrix.package_id }}
 
       - name: Publish binary package
         working-directory: .tmp-release/${{ matrix.package_id }}
