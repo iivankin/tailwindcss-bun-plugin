@@ -105,7 +105,7 @@ jobs:
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             package_id: linux-arm64-musl
-            bun_asset: bun-linux-aarch64-musl.zip
+            bun_asset: bun-linux-x64-musl.zip
             strip: aarch64-linux-musl-strip
             download: true
             container:
