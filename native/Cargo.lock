@@ -82,7 +82,7 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 [[package]]
 name = "classification-macros"
 version = "0.1.0"
-source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.1#1dce64ee7ec2e414c845b4e268ac3b9b89aaf0c8"
+source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.2#d596b0c43d36ad5099c983930fb155e089cbc291"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -309,7 +309,7 @@ dependencies = [
 [[package]]
 name = "ignore"
 version = "0.4.24"
-source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.1#1dce64ee7ec2e414c845b4e268ac3b9b89aaf0c8"
+source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.2#d596b0c43d36ad5099c983930fb155e089cbc291"
 dependencies = [
  "crossbeam-deque",
  "dunce",
@@ -710,7 +710,7 @@ dependencies = [
 [[package]]
 name = "tailwindcss-oxide"
 version = "0.1.0"
-source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.1#1dce64ee7ec2e414c845b4e268ac3b9b89aaf0c8"
+source = "git+https://github.com/tailwindlabs/tailwindcss.git?tag=v4.2.2#d596b0c43d36ad5099c983930fb155e089cbc291"
 dependencies = [
  "bexpand",
  "bstr",

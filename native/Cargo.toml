@@ -12,7 +12,7 @@ fxhash = { package = "rustc-hash", version = "2.1.1" }
 napi = { version = "3.3.0", default-features = false, features = ["napi4"] }
 napi-derive = "3.2.5"
 rayon = "1.10.0"
-tailwindcss-oxide = { git = "https://github.com/tailwindlabs/tailwindcss.git", tag = "v4.2.1" }
+tailwindcss-oxide = { git = "https://github.com/tailwindlabs/tailwindcss.git", tag = "v4.2.2" }
 
 [build-dependencies]
 napi-build = "2.2.3"

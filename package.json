@@ -1,6 +1,6 @@
 {
   "name": "tailwindcss-bun-plugin",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Tailwind CSS v4 plugin for Bun.build.",
   "type": "module",
   "license": "Apache-2.0",
@@ -45,16 +45,16 @@
     "stage:root-package": "bun ./scripts/stage-root-package.ts"
   },
   "dependencies": {
-    "@tailwindcss/node": "4.2.1",
-    "tailwindcss": "4.2.1"
+    "@tailwindcss/node": "4.2.2",
+    "tailwindcss": "4.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.7",
-    "@napi-rs/cli": "3.4.1",
-    "@types/bun": "1.3.10",
+    "@biomejs/biome": "2.4.8",
+    "@napi-rs/cli": "3.5.1",
+    "@types/bun": "1.3.11",
     "@types/node": "25.5.0",
     "lefthook": "2.1.4",
     "typescript": "5.9.3",
-    "ultracite": "7.3.1"
+    "ultracite": "7.3.2"
   }
 }
