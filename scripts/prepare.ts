@@ -170,7 +170,9 @@ const targetBuildDir = path.join(BUILD_DIR, target);
 await fs.rm(targetBuildDir, { recursive: true, force: true });
 await fs.mkdir(targetBuildDir, { recursive: true });
 
-await Bun.$`bun x napi build --platform --release --target=${target} --output-dir ${targetBuildDir} --no-js`.cwd(
+// Force Bun to execute the CLI so release builds don't depend on the
+// container image's Node.js version supporting newer @inquirer APIs.
+await Bun.$`bun x --bun napi build --platform --release --target=${target} --output-dir ${targetBuildDir} --no-js`.cwd(
   NATIVE_DIR
 );
 
