@@ -6,6 +6,8 @@ on:
 
 env:
   BUN_VERSION: '1.3.11'
+  NODE_VERSION: '24'
+  NPM_VERSION: '11.15.0'
 
 jobs:
   changes:
@@ -192,14 +194,20 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v6
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install npm CLI
+        run: npm install --global npm@${{ env.NPM_VERSION }}
 
       - name: Download binary package artifact
         uses: actions/download-artifact@v4
@@ -209,9 +217,7 @@ jobs:
 
       - name: Publish binary package
         working-directory: .tmp-release/${{ matrix.package_id }}
-        run: bun publish --access public
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
 
   publish:
     needs: [changes, publish-binary-packages]
@@ -223,6 +229,7 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -232,11 +239,19 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install npm CLI
+        run: npm install --global npm@${{ env.NPM_VERSION }}
+
       - name: Stage root package
         run: bun run stage:root-package
 
       - name: Publish root package
         working-directory: .tmp-release/root
-        run: bun publish --access public
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

@@ -17,6 +17,7 @@ async function readRootPackageJson() {
   return JSON.parse(
     await Bun.file(path.join(ROOT_DIR, "package.json")).text()
   ) as {
+    repository?: Record<string, unknown> | string;
     version: string;
     license?: string;
   };
@@ -42,6 +43,7 @@ const packageJson = {
   version: rootPackage.version,
   description: `This is the ${config.id} binary for \`tailwindcss-bun-plugin\``,
   license: rootPackage.license ?? "Apache-2.0",
+  repository: rootPackage.repository,
   os: config.os,
   cpu: config.cpu,
   ...(config.libc ? { libc: config.libc } : {}),
