@@ -11,7 +11,7 @@ The original `bun-plugin-tailwind` is not in good shape for real use:
 - it is stuck on Tailwind CSS `4.1.14`
 - its packaging strategy pulls more native binaries than necessary
 
-This package exists to provide a maintained Tailwind CSS plugin for Bun that tracks Tailwind CSS `4.2.x`, works with Bun `1.3.10+`, and ships platform-specific native bindings through optional dependencies instead of downloading every binary for every install.
+This package exists to provide a maintained Tailwind CSS plugin for Bun that tracks Tailwind CSS `4.3.x`, works with Bun `1.3.11+`, and ships platform-specific native bindings through optional dependencies instead of downloading every binary for every install.
 
 ## Install
 
