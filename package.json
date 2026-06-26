@@ -1,6 +1,6 @@
 {
   "name": "tailwindcss-bun-plugin",
-  "version": "4.3.0",
+  "version": "4.3.1",
   "description": "Tailwind CSS v4 plugin for Bun.build.",
   "type": "module",
   "license": "Apache-2.0",
@@ -45,8 +45,8 @@
     "stage:root-package": "bun ./scripts/stage-root-package.ts"
   },
   "dependencies": {
-    "@tailwindcss/node": "4.3.0",
-    "tailwindcss": "4.3.0"
+    "@tailwindcss/node": "4.3.1",
+    "tailwindcss": "4.3.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.8",
